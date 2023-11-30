@@ -1,5 +1,5 @@
-import fabric2
-from fabric2 import Connection
+import fabric
+from fabric import Connection
 import argparse
 import time
 import traceback
@@ -13,7 +13,7 @@ class DeviceTest:
     args = None
     connection = None
     argparser = None
-    
+
     def get_parser(self,parent_test="",parent_description=""):
         if self.argparser is None:
             '''
@@ -44,7 +44,7 @@ class DeviceTest:
                                    action='store_true')
 
 
-            self.argparser = argparser 
+            self.argparser = argparser
         return self.argparser
 
 
