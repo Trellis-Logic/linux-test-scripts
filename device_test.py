@@ -86,7 +86,7 @@ class DeviceTest:
     @timeout(5)
     def verify_connection(self):
         self.connection = None
-        self.get_connection().run("echo hello", timeout=3)
+        self.get_connection().run("echo connection test", timeout=3)
 
     def wait_for_device(self):
         conn = self.get_connection()
@@ -97,12 +97,16 @@ class DeviceTest:
         while not success:
             try:
                 self.verify_connection()
+                time.sleep(3)
+                self.verify_connection()
+                time.sleep(15)
+                self.verify_connection()
                 success = True
             except Exception as e:
                 if not quiet:
                     print('Exception {e} connecting, retrying..')
                     quiet = True
-            time.sleep(3)
+                time.sleep(3)
 
 
     def ping(self):

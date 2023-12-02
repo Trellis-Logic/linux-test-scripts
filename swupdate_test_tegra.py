@@ -2,6 +2,7 @@ from device_test import DeviceTest
 import sys
 import subprocess
 import paramiko
+from timeout_decorator import timeout
 
 class SwupdateTestTegra(DeviceTest):
     def get_parser(self):
@@ -26,6 +27,22 @@ class SwupdateTestTegra(DeviceTest):
         r = self.get_connection().run("nvbootctrl get-current-slot")
         return int(r.stdout.strip())
 
+    @timeout(120)
+    def do_file_transfer(self):
+        print(f"Copying update file {self.get_args().updatefile} to target")
+        self.get_connection().put(local=self.get_args().updatefile, remote="/tmp/swupdate.swu")
+
+
+    def transfer_file(self):
+        file_transfer_incomplete = True
+        while file_transfer_incomplete:
+            try:
+                self.do_file_transfer()
+                file_transfer_incomplete = False
+            except Exception as e:
+                print(f"Caught error on attempt at file transfer, retrying")
+
+
     def verify_update(self):
         start_slot = self.get_slot()
         self.validate_slot()
@@ -35,6 +52,7 @@ class SwupdateTestTegra(DeviceTest):
         print(f"Reboot completed, new slot is {end_slot}")
         if end_slot == start_slot:
             raise Exception("Slot did not change after update, started and ended at {start_slot}")
+
         self.validate_slot()
 
     def do_swupdate_torture(self):
@@ -42,16 +60,9 @@ class SwupdateTestTegra(DeviceTest):
         print(f"Starting swupdate tegra torture tests with {num_updates} update passes")
 
         for i in range (num_updates):
-            self.connection = None
-            connection = self.get_connection()
-            # Necessary since the host key will change on reboot by default
-            connection.client.set_missing_host_key_policy(paramiko.WarningPolicy())
             print(f"Starting update {i+1}")
-            self.get_machine_id()
-            print(f"Copying update file {self.get_args().updatefile} to target")
-            connection.put(local=self.get_args().updatefile, remote="/tmp/swupdate.swu")
-            print("Starting Update")
-            connection.run("bash -c 'source /usr/lib/swupdate/conf.d/* && swupdate $SWUPDATE_ARGS -i /tmp/swupdate.swu'")
+            self.transfer_file()
+            self.get_connection().run("bash -c 'source /usr/lib/swupdate/conf.d/* && swupdate $SWUPDATE_ARGS -i /tmp/swupdate.swu'")
             self.verify_update()
 
 
