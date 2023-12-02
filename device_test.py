@@ -1,19 +1,16 @@
-import fabric2
-from fabric2 import Connection
+from fabric import Connection
 import argparse
 import time
-import traceback
-import sys
-import re
 import subprocess
 import platform
+from timeout_decorator import timeout
 
 class DeviceTest:
     DEFAULT_USER = 'root'
     args = None
     connection = None
     argparser = None
-    
+
     def get_parser(self,parent_test="",parent_description=""):
         if self.argparser is None:
             '''
@@ -44,7 +41,7 @@ class DeviceTest:
                                    action='store_true')
 
 
-            self.argparser = argparser 
+            self.argparser = argparser
         return self.argparser
 
 
@@ -86,23 +83,31 @@ class DeviceTest:
                     })
         return self.connection
 
+    @timeout(5)
+    def verify_connection(self):
+        self.connection = None
+        self.get_connection().run("echo connection test", timeout=3)
+
     def wait_for_device(self):
         conn = self.get_connection()
         print(f'Trying to connect to {self.get_args().device}....')
         success = False
         ip = None
-        quiet = False
+        quiet = True
         while not success:
             try:
-                conn.open()
+                self.verify_connection()
+                time.sleep(3)
+                self.verify_connection()
+                time.sleep(15)
+                self.verify_connection()
                 success = True
             except Exception as e:
                 if not quiet:
-                    print(e)
-                    print('Exception connecting, retrying..')
+                    print('Exception {e} connecting, retrying..')
                     quiet = True
-            time.sleep(3)
-        time.sleep(15)
+                time.sleep(3)
+
 
     def ping(self):
         args=self.get_args()
@@ -134,9 +139,9 @@ class DeviceTest:
             result = conn.run("reboot", warn=True)
         self.wait_for_device_removal()
         self.wait_for_device()
-        self.get_machine_id() # This tests the connection
+
 
     def get_machine_id(self):
         conn = self.get_connection()
-        result = conn.run("systemd-machine-id-setup --print", hide=True, timeout=3)
+        result = conn.run("systemd-machine-id-setup --print", hide=True, timeout=3.0)
         return result.stdout
