@@ -25,3 +25,15 @@ Where `user` is the username passed with the `--user` argument.
 
 Then run the test case with the `--sudo` argument specified to use sudo with the reboot command
 
+## Update Tests
+
+### swupdate (tegra platforms)
+
+Run
+```
+python3 swupdate_test_tegra.py --device <ip addr> --password <password> --updatefile <file>
+```
+
+To run a swupdate test for OE4T tegra based platforms which include swupdate with A/B rootfs.
+
+The test will perform 100 consecutive updates, verifying boot and rootfs slots are switched synchronously after each.
