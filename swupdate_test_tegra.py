@@ -21,7 +21,11 @@ class SwupdateTestTegra(DeviceTest):
         r = self.get_connection().run(f"mount | grep '{self.get_rootfs_for_slot(slot)} '")
 
     def get_rootfs_for_slot(self, slot):
-        return f"/dev/mmcblk0p{slot+1}"
+        append= ""
+        if slot == 1:
+            append = "_b"
+        result = self.get_connection().run(f"ls -la /dev/disk/by-partlabel/APP{append}")
+        return result.stdout.strip().split("/")[-1]
 
     def get_slot(self):
         r = self.get_connection().run("nvbootctrl get-current-slot")
@@ -62,7 +66,7 @@ class SwupdateTestTegra(DeviceTest):
         for i in range (num_updates):
             print(f"Starting update {i+1}")
             self.transfer_file()
-            self.get_connection().run("bash -c 'source /usr/lib/swupdate/conf.d/* && swupdate $SWUPDATE_ARGS -i /tmp/swupdate.swu'")
+            self.get_connection().run("swupdate -v -i /tmp/swupdate.swu")
             self.verify_update()
 
 
