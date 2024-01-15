@@ -31,7 +31,7 @@ Then run the test case with the `--sudo` argument specified to use sudo with the
 
 Run
 ```
-python3 swupdate_test_tegra.py --device <ip addr> --password <password> --updatefile <file>
+python3 swupdate_test_tegra.py --device <ip addr> --updatefile <file>
 ```
 
 To run a swupdate test for OE4T tegra based platforms which include swupdate with A/B rootfs.
