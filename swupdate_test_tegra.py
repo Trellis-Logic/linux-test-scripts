@@ -12,6 +12,9 @@ class SwupdateTestTegra(DeviceTest):
                                    '--updatefile',
                                    help='The local file to use for updates',
                                    required = True)
+            argparser.add_argument('--forcecapsule',
+                                   action='store_true',
+                                   help='Force capsule upgrades by creating mismatch in sw-versions')
         return self.argparser
 
     def validate_slot(self):
@@ -59,6 +62,10 @@ class SwupdateTestTegra(DeviceTest):
 
         self.validate_slot()
 
+    def create_version_mismatch(self):
+        print(f"Forcing capsule update by creating version mismatch")
+        self.get_connection().run("sed -E 's/[0-9]+\.[0-9]+\.[0-9]+/0.0.0/' -i /run/swupdate/sw-versions")
+
     def do_swupdate_torture(self):
         num_updates=100
         print(f"Starting swupdate tegra torture tests with {num_updates} update passes")
@@ -66,6 +73,9 @@ class SwupdateTestTegra(DeviceTest):
         for i in range (num_updates):
             print(f"Starting update {i+1}")
             self.transfer_file()
+            if self.get_args().forcecapsule:
+                self.create_version_mismatch()
+
             self.get_connection().run("swupdate -v -i /tmp/swupdate.swu")
             self.verify_update()
 
