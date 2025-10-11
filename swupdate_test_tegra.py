@@ -93,7 +93,7 @@ class SwupdateTestTegra(DeviceTest):
 
     def create_version_mismatch(self):
         print(f"Forcing capsule update by creating version mismatch")
-        self.get_connection().run("sed -E 's/[0-9]+\.[0-9]+\.[0-9]+/0.0.0/' -i /run/swupdate/sw-versions")
+        self.get_connection().run(r"sed -E 's/[0-9]+\.[0-9]+\.[0-9]+/0.0.0/' -i /run/swupdate/sw-versions")
 
     def do_swupdate_torture(self):
         num_updates = self.get_args().num_updates
