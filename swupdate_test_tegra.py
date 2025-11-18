@@ -2,7 +2,7 @@ from device_test import DeviceTest
 import sys
 import subprocess
 import paramiko
-from timeout_decorator import timeout
+from wrapt_timeout_decorator import timeout
 import re
 import random
 

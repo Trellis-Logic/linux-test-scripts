@@ -3,7 +3,7 @@ import argparse
 import time
 import subprocess
 import platform
-from timeout_decorator import timeout
+from wrapt_timeout_decorator import timeout
 
 class DeviceTest:
     DEFAULT_USER = 'root'

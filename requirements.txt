@@ -1,2 +1,2 @@
 fabric >= 3.0
-timeout-decorator
+wrapt-timeout-decorator
